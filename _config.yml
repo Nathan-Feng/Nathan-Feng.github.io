@@ -5,7 +5,7 @@ header-img: img/home-bg.jpg
 email: hellozhaoyf@126.com
 description: "this is description"
 keyword: "keyword1"
-url: "http://zhaoyf.cn"              # your host, for absolute URL
+url: "https://zhaoyf.cn"              # your host, for absolute URL
 baseurl: ""         # for example, '/blog' if your blog hosted on 'host/blog'
 
 
