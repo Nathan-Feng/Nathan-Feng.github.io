@@ -1,13 +1,14 @@
 ---
 layout:     post
 title:      " 如何在谷歌Android TV Launcher上显示自定义的Channel/Program"
-subtitle:   " 基于java "
+subtitle:   " Recommend content on the ATV home screen "
 author:     "Nathan"
 tags:
     - ATV
 ---
 
-> 如何在谷歌Android TV Launcher上显示自定义的ChannelProgram（基于java）
+
+
 ### 前言
 
 ---
@@ -20,7 +21,7 @@ tags:
 
 
 
-步骤只要分三步
+步骤只要分4步
 1. 准备前提条件
 2. 创建Channel以及发布
 3. 创建program
@@ -113,19 +114,17 @@ long channelId = ContentUris.parseId(channelUri);
 
 
 
-
-
 **Channel 部分总结一下：**
 
 `channels`这个表中需要关注几个选项有：
 
-	- package_name ：应用的包名
-	- type：默认都一样
-	- display_name ：显示Channel名称
-	- app_link_intent_uri :当点击左边应用图标时会启动一个intent，打开应用
-	- logo ：应用的图标
+- `package_name` ：应用的包名
+- `type`：默认都一样
+- `display_name` ：显示Channel名称
+- `app_link_intent_uri` :当点击左边应用图标时会启动一个intent，打开应用
+- `logo` ：应用的图标
 
-### 关于Program说明
+关于Program说明
 
 书接上回：再看`preview_programs`这个表：顾名思义，就是预览program的地方,
 
@@ -190,9 +189,9 @@ long programId = ContentUris.parseId(programUri);
 
 ### 关于Channel显示和发布
 
-创建channel后，launcher中如果想立即显示，有几个方法：*
+创建channel后，launcher中如果想立即显示，有如下几个方法：
 
-创建默认Channel时，调用 `TvContractCompat.requestChannelBrowsable(context, channelId);` 其中channelId就是创建channel时返回的id，此时如果preview_programs表里面存在_id与channelId相同时，那么就会都显示在launcher上。
+**方法1：**创建默认Channel时，调用 `TvContractCompat.requestChannelBrowsable(context, channelId);` 其中channelId就是创建channel时返回的id，此时如果preview_programs表里面存在_id与channelId相同时，那么就会都显示在launcher上。
 
 **注意**：如果你的apk是系统级的，AndroidManifest.xml中加入`android:sharedUserId="android.uid.system"`，那么及时你是创建的默认channel，也是不会立即显示在launcher上的(*这个问题已经反映给谷歌了，应该是个bug*)。那么想显示的话，那需要如下方法:
 
@@ -214,7 +213,7 @@ Intent intent = new Intent(TvContractCompat.ACTION_REQUEST_CHANNEL_BROWSABLE);
 
 当用户选择add后，就能立即显示了(其实原理就是让系统强行设置tv.db中channel表中相应channelId的`browsable`属性设置为1)
 
-另一个方法就是在ATV的launcher中最下方有个选择：
+**方法2：**另一个方法就是在ATV的launcher中最下方有个选择：
 
 ![image-20191210160120303](/img/atv-channel/customize-channels.png)
 
@@ -260,9 +259,9 @@ grantUriPermission("com.google.android.tvlauncher", uri, Intent.FLAG_GRANT_READ_
 
 **步骤4**：把步骤3得到的uri，设置给`PreviewProgram`的`setPosterArtUri`即可
 
-
-
 其他还有用户交互部分，直接看[官网介绍](https://developer.android.google.cn/training/tv/discovery/recommendations-channel#android_tv_home_screen_events)即可
+
+
 
 ## 总结
 
