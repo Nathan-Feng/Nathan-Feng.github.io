@@ -57,10 +57,10 @@ androidx.tvprovider.media.tv.PreviewProgram.java
 
 如上图，分四个部分，
 
-	- 左边是应用的**图标**和**名称**，
-	- 上面是Channel的名称：`Recommended`
-	- 中间是一个卡片背景，以及一个节目时长
-	- 下面是节目的名称，详情等信息
+ 	- 左边是应用的**图标**和**名称**，
+ 	- 上面是Channel的名称：`Recommended`
+ 	- 中间是一个卡片背景，以及一个节目时长
+ 	- 下面是节目的名称，详情等信息
 
 根据[官方文档](https://developer.android.google.cn/training/tv/discovery/recommendations-channel#java)，Android TV 主屏幕使用 Android 的 `TvProvider` API 来管理您的应用创建的频道和节目，谷歌的ATV Launcher会默认读取`data/data/com.android.providers.tv/databases/tv.db`
 
@@ -135,7 +135,7 @@ long channelId = ContentUris.parseId(channelUri);
 
 书接上回：再看`preview_programs`这个表：顾名思义，就是预览program的地方,
 
-![image-20191210150524322](C:\Users\zhaoyufeng3\Desktop\总结\如何在谷歌Android TV Launcher上显示自定义的ChannelProgram（基于java）.assets\image-20191210150524322.png)
+![image-20191210150524322](/img/atv-channel/sqlite-program.png)
 
 如上图(截取部分)，主要关于几个属性如下：
 
@@ -222,7 +222,7 @@ Intent intent = new Intent(TvContractCompat.ACTION_REQUEST_CHANNEL_BROWSABLE);
 
 另一个方法就是在ATV的launcher中最下方有个选择：
 
-![image-20191210160120303](/img/atv-channel/customize-channel.png)
+![image-20191210160120303](/img/atv-channel/customize-channels.png)
 
 点击进去后，选择相应的channel，Open/Close即可。
 
