@@ -57,10 +57,10 @@ androidx.tvprovider.media.tv.PreviewProgram.java
 
 如上图，分四个部分，
 
-- 左边是应用的**图标**和**名称**，
-- 上面是Channel的名称：`Recommended`
-- 中间是一个卡片背景，以及一个节目时长
-- 下面是节目的名称，详情等信息
+1. 左边是应用的**图标**和**名称**，
+2. 上面是Channel的名称：`Recommended`
+3. 中间是一个卡片背景，以及一个节目时长
+4. 下面是节目的名称，详情等信息
 
 根据[官方文档](https://developer.android.google.cn/training/tv/discovery/recommendations-channel#java)，Android TV 主屏幕使用 Android 的 `TvProvider` API 来管理您的应用创建的频道和节目，谷歌的ATV Launcher会默认读取`data/data/com.android.providers.tv/databases/tv.db`
 
