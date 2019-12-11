@@ -119,17 +119,11 @@ long channelId = ContentUris.parseId(channelUri);
 
 `channels`这个表中需要关注几个选项有：
 
- - package_name ：应用的包名
-
- - type：默认都一样
-
- - display_name ：显示Channel名称
-
- - app_link_intent_uri :当点击左边应用图标时会启动一个intent，打开应用
-
- - logo ：应用的图标
-
-   
+	- package_name ：应用的包名
+	- type：默认都一样
+	- display_name ：显示Channel名称
+	- app_link_intent_uri :当点击左边应用图标时会启动一个intent，打开应用
+	- logo ：应用的图标
 
 ### 关于Program说明
 
