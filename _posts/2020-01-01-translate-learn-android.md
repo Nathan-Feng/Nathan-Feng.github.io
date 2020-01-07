@@ -13,7 +13,7 @@ tags:
 >
 > I am not a good article taker,  but a sharer!
 >
-> 原文地址：https://codinginflow.com/learn-android-development-complete-beginner
+> 原文地址：[https://codinginflow.com/learn-android-development-complete-beginner](https://codinginflow.com/learn-android-development-complete-beginner)
 >
 > 作者：**Florian**
 
