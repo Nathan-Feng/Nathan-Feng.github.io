@@ -94,9 +94,12 @@ The commands and default sources are:
 
 ### 5.find&grep 相关
 
-* grep -rn 'aaa'   --exclude-dir={0000,1111,222}  //排除目录
-* logcat | grep -vE "DEBUG|BluetoothManagerService" //反过滤
-* find ./ -name "*.mk" | grep -rn "xxx" //在当前目录下所有.mk结尾的文件中搜索xxx字符
+* `grep -rn 'aaa'   --exclude-dir={0000,1111,222}`  //排除目录
+* `logcat | grep -vE "DEBUG|BluetoothManagerService"` //反过滤
+* `find ./ -name "*.mk" | grep -rn "xxx"` //在当前目录下所有.mk结尾的文件中搜索xxx字符
+* `locate xxx` //定位文件的位置，速度较快，不过需要更新db才行
+* `logcate -w "*xx/yyy/zzz"` //查找是否有符合路径存在
+* `find . -wholename "*xxx/yyy/zzz" -type d` //查找是否有符合路径存在
 
 ### 6.挂载相关
 
@@ -107,8 +110,12 @@ The commands and default sources are:
 
 * `setenforce 0`  //临时关闭selinux，打开就是1
 * `getenforce`  // ( Permissive/Enforcing )查看当前的模式
+* `dmesg |grep avc`  // 查找所有有avc denied 相关的日志
 
+### 8.linux查看
 
+* `df -h` // 查看所有系统分区的情况
+* `du -sh dir` //查看目录占用空间情况
 
 
 
