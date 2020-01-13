@@ -61,7 +61,8 @@ tags:
 
 input的用法：
 
-`console:/ # input
+```
+console:/ # input
 Usage: input [<source>] [-d DISPLAY_ID] <command> [<arg>...]
 
 The sources are: 
@@ -86,7 +87,10 @@ The commands and default sources are:
       draganddrop <x1> <y1> <x2> <y2> [duration(ms)] (Default: touchscreen)
       press (Default: trackball)
       roll <dx> <dy> (Default: trackball)
-      event <DOWN|UP|MOVE> <x> <y> (Default: touchscreen)`
+      event <DOWN|UP|MOVE> <x> <y> (Default: touchscreen)
+```
+
+
 
 ### 4.logcat相关
 
@@ -96,10 +100,12 @@ The commands and default sources are:
 
 * `grep -rn 'aaa'   --exclude-dir={0000,1111,222}`  //排除目录
 * `logcat | grep -vE "DEBUG|BluetoothManagerService"` //反过滤
+* `logcat |grep -e MainActivity -e SimpleHbbTv`  //双过滤 
 * `find ./ -name "*.mk" | grep -rn "xxx"` //在当前目录下所有.mk结尾的文件中搜索xxx字符
 * `locate xxx` //定位文件的位置，速度较快，不过需要更新db才行
 * `logcate -w "*xx/yyy/zzz"` //查找是否有符合路径存在
 * `find . -wholename "*xxx/yyy/zzz" -type d` //查找是否有符合路径存在
+* `find ./ ! -path "./output/*" ! -path "./output1/*" -type f | xargs grep "abc"` //忽略一个目录或者多个目录
 
 ### 6.挂载相关
 
@@ -117,7 +123,16 @@ The commands and default sources are:
 * `df -h` // 查看所有系统分区的情况
 * `du -sh dir` //查看目录占用空间情况
 
+### 9.卸载系统应用方法
 
+快速卸载任意应用（包括系统应用）
+
+1. `pm list packages --user 0` -->查看所有可卸载的包名
+2. `pm uninstall --user 0` 包名
+
+### 其他
+
+- `dumpsys window |grep mCurrentFocus` //查看当前app的包名 
 
 
 
