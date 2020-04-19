@@ -78,7 +78,7 @@ Android的SDK提供了`android.os.Build`用于通用的信息，大家可以直�
 
 ### Demo结构说明
 
-**demo地址**：[https://github.com/Nathan-Feng/AndroidTVDeviceInfo](`https://github.com/Nathan-Feng/AndroidTVDeviceInfo`)
+**demo地址**：[https://github.com/Nathan-Feng/AndroidTVDeviceInfo](https://github.com/Nathan-Feng/AndroidTVDeviceInfo)
 
 目录结构如下：
 
