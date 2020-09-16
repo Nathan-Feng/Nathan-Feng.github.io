@@ -1,6 +1,6 @@
 ---
 layout:     post
-title:      "Android  adb tools for auto connect "
+title:      "Android  adb tools "
 subtitle:   "Android  adb tools for auto connect by win bat"
 date:   2020-09-16 21:41:00 +0800
 author:     "Nathan"
