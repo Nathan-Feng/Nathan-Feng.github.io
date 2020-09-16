@@ -23,19 +23,19 @@ tags:
 
 开发环境：
 
-		- Win10 + Android Studio
-		- 串口 + CMD窗口
-		- 开发板 
-		- B网卡 + 网口
+* Win10 + Android Studio
+* 串口 + CMD窗口
+* 开发板 
+* B网卡 + 网口
 
 在开发过程中，一般的过程如下：
 
-	- 板子开机进入launcher
-	- 通过串口看板子获取的IP地址(`ifconfig`，通过B网卡一般为`192.168.137`段的) 
-	- Win10 打开一个`cmd`窗口
-	- 输入`adb connect xxx.xxx.xxx.xxx`
-	- 输入`adb remount`
-	- 输入`adb push xxx xxxx`
+- 板子开机进入launcher
+- 通过串口看板子获取的IP地址(`ifconfig`，通过B网卡一般为`192.168.137`段的) 
+- Win10 打开一个`cmd`窗口
+- 输入`adb connect xxx.xxx.xxx.xxx`
+- 输入`adb remount`
+- 输入`adb push xxx xxxx`
 
 更麻烦的是，每次reboot之后，板端的IP地址就变了。所以需要重复上述过程，非常耗时而且繁琐
 
@@ -45,9 +45,9 @@ tags:
 
 思路如下：
 
-	- 板子开机后会自动获取某一个ip
-	- 电脑端查询到此时所有的ip地址并过滤出来
-	- 然后根据查询到的ip地址进行adb connect自动操作
+1. 板子开机后会自动获取某一个ip
+2. 电脑端查询到此时所有的ip地址并过滤出来
+3. 然后根据查询到的ip地址进行adb connect自动操作
 
 笔者想到了BAT脚本的功能，并赶鸭子上架，学习了几个实用的命令 `arp`，问题解决了。
 
@@ -112,9 +112,9 @@ start cmd
 
 ## 总结
 
- - 从有想法到实现，也就半天的时间(现学bat脚本现卖)
+- 从有想法到实现，也就半天的时间(现学bat脚本现卖)
 
- - 希望本文对大家有所帮助，能够对您在解决工作和生活中的一些小痛点时有所启发
+- 希望本文对大家有所帮助，能够对您在解决工作和生活中的一些小痛点时有所启发
 
 - 本文工具下载地址： [传送门](https://github.com/Nathan-Feng/Tools)
 
