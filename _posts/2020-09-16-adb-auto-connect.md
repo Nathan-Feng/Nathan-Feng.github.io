@@ -1,4 +1,3 @@
-## Android  tools for auto `adb connect `
 ---
 layout:     post
 title:      "Android  adb tools for auto connect "
