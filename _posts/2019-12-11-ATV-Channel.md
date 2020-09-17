@@ -69,7 +69,7 @@ androidx.tvprovider.media.tv.PreviewProgram.java
 
 大家可以拷贝出来，使用`SQLite Expert`软件来打开查看里面内容，
 
-![image-20191210113515252](/img/atv-channel/tv-db.png)
+![image-20191210113515252](/img/atv-channel/sqlite-table.png)
 
 其中`channels`主要就是我们创建channel后，保存channel信息的地方了，
 
@@ -77,7 +77,7 @@ androidx.tvprovider.media.tv.PreviewProgram.java
 
 点开后，我们看第4和5行，也就是package name是youtube的那两行，
 
-1. 首先看下`type`,都是`TYPE_PREVIEW` ，意思就是只又channels中的type符合TYPE_PREVIEW，launcher才会认为是一个推送channel，才会在launcher上显示。然后才会去`preview_programs`表中查找相应`_id`，所以能解释为什么[官网](https://developer.android.google.cn/training/tv/discovery/recommendations-channel#creating_a_channel)说的：频道类型必须是 `TYPE_PREVIEW`
+1. 首先看下`type`,都是`TYPE_PREVIEW` ，意思就是只有channels中的type符合TYPE_PREVIEW，launcher才会认为是一个推送channel，才会在launcher上显示。然后才会去`preview_programs`表中查找相应`_id`，所以能解释为什么[官网](https://developer.android.google.cn/training/tv/discovery/recommendations-channel#creating_a_channel)说的：频道类型必须是 `TYPE_PREVIEW`
 2. 再看下`display_name`这一列，也就是显示在主页中每一行的标题
 3. 另外还有logo，存储的就是logo图片了
 
@@ -261,7 +261,9 @@ grantUriPermission("com.google.android.tvlauncher", uri, Intent.FLAG_GRANT_READ_
 
 其他还有用户交互部分，直接看[官网介绍](https://developer.android.google.cn/training/tv/discovery/recommendations-channel#android_tv_home_screen_events)即可
 
+最后放上一个运行后的效果：
 
+![image-20191210171325546](/img/atv-channel/tv-test.png)
 
 ## 总结
 
