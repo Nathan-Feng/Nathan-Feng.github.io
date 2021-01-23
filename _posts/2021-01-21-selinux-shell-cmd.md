@@ -50,5 +50,13 @@ tags:
 
 Android app开发中(以java为例) ，一般执行shell命令的简单方法：`Runtime.getRuntime().exec(isRooted ? "su" : "sh");`调用一些简单的命令如logcat等，不过由于System app的权限问题，不能以su命令来执行,而都是shell权限执行，导致很多root下的可执行程序无法正常使用。
 
+由于谷歌在Android 8.0上引入了Treble架构,进一步隔离了 Framework进程和Hal，所以system分区里面的app想要调用vendor里面的接口，必须走HIDL，本文也是从HIDL入手，利用HIDL的service权限，来提升App调用的权限。
+
+### 接口设计
+
+首先总体流程如下:
+
+![overall-flow](/img/shell-cmd/overall-flow.png)
+
 
 
