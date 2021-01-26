@@ -136,7 +136,7 @@ static int do_system_cmd(const char *arg, char *reply,bool isNeedRet){
 
 关于HIDL服务，我这里就说一点权限问题
 
-```java
+```c
 vendor.nathan.hwstbcmdservice@1.0-service.rc
 
 service hwstbcmdservice-1-0 /vendor/bin/hw/vendor.nathan.hwstbcmdservice@1.0-service
@@ -147,8 +147,6 @@ service hwstbcmdservice-1-0 /vendor/bin/hw/vendor.nathan.hwstbcmdservice@1.0-ser
 ```
 
 其中user和group，我加的root和system，如果user是system的话，那么这个服务是无法执行root shell命令的。这里要注意下。
-
-
 
 ### SELinux(SEAndroid)权限处理
 
