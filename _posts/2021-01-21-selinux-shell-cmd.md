@@ -79,6 +79,77 @@ Android app开发中(以java为例) ，一般执行shell命令的简单方法：
 
 关于代码位置我会再单独出一篇文章，讲讲我在ROM开发过程中一些常用方法介绍。
 
+### 接口设计
+
+源码入口：https://github.com/Nathan-Feng/shell-hidl
+
+#### 1.Jar
+
+````
+ShellCmd.java
+	public native String hsInvokeJni(String cmd, int type);
+````
+
+这里参数`cmd` 就是需要执行的shell命令，`type` 主要是用于区分是否需要返回值，因为有些shell命令是阻塞式的，如果不区分的话，很容易卡住，返回值就是shell执行的结果。
+
+另外由于是要调用JNI方法，所以这里加了`native`。
+
+#### 2. Shell命令的C实现
+
+```C
+nathan_hal.c
+
+static int do_system_cmd(const char *arg, char *reply,bool isNeedRet){
+	FILE *fpRead = NULL;
+	char cmd[1024]={0};
+	char buf[1024]={0};
+	memset(buf,0,sizeof(buf));
+		fpRead = popen(arg,"r");
+		if(fpRead == NULL){
+			ALOGE(" run system error!");
+			return -1;	
+		}
+		if(!isNeedRet){
+			pclose(fpRead);
+			fpRead = NULL;
+			return 0;
+		}
+		while(fgets(buf,1024-1,fpRead) != NULL && strlen(reply) < BUFFER_MAX){
+			if(BUFFER_MAX > (strlen(buf) + strlen(reply))){
+				strncat(reply,buf,strlen(buf));
+			}				
+			else{			
+				strncat(reply,buf,BUFFER_MAX - strlen(reply));
+			}
+		}	
+		pclose(fpRead);
+		fpRead = NULL;
+	return 0;
+}
+```
+
+主要就是利用popen函数创建管道来发送shell命令，并拿到fget拿到返回结果。
+
+其他主要看代码就好，这里就细说了。
+
+#### 3.HIDL服务创建
+
+关于HIDL服务，我这里就说一点权限问题
+
+```java
+vendor.nathan.hwstbcmdservice@1.0-service.rc
+
+service hwstbcmdservice-1-0 /vendor/bin/hw/vendor.nathan.hwstbcmdservice@1.0-service
+    class hal
+    user root
+    group root system
+
+```
+
+其中user和group，我加的root和system，如果user是system的话，那么这个服务是无法执行root shell命令的。这里要注意下。
+
+
+
 ### SELinux(SEAndroid)权限处理
 
 谷歌官网地址：`https://source.android.google.cn/security/selinux`
