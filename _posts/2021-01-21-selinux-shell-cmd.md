@@ -194,6 +194,7 @@ service hwstbcmdservice-1-0 /vendor/bin/hw/vendor.nathan.hwstbcmdservice@1.0-ser
 	- 没有万能的接口，都是遇到具体需求，具体分析的
 	- 本文的例子是本人`智慧`的结晶，如果满意，还请三连
 	- 源码传送门：[https://github.com/Nathan-Feng/shell-hidl](https://github.com/Nathan-Feng/shell-hidl)
+	- 如果有问题或者疑问，欢迎随时交流
 
 下一篇介绍下相关编译的配置部分，欢迎大家点击阅读
 
