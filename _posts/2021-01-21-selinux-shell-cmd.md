@@ -81,7 +81,7 @@ Android app开发中(以java为例) ，一般执行shell命令的简单方法：
 
 ### 接口设计
 
-源码入口：https://github.com/Nathan-Feng/shell-hidl
+源码入口：[https://github.com/Nathan-Feng/shell-hidl](https://github.com/Nathan-Feng/shell-hidl)
 
 #### 1.Jar
 
@@ -101,7 +101,6 @@ nathan_hal.c
 
 static int do_system_cmd(const char *arg, char *reply,bool isNeedRet){
 	FILE *fpRead = NULL;
-	char cmd[1024]={0};
 	char buf[1024]={0};
 	memset(buf,0,sizeof(buf));
 		fpRead = popen(arg,"r");
@@ -148,9 +147,9 @@ service hwstbcmdservice-1-0 /vendor/bin/hw/vendor.nathan.hwstbcmdservice@1.0-ser
 
 其中user和group，我加的root和system，如果user是system的话，那么这个服务是无法执行root shell命令的。这里要注意下。
 
-### SELinux(SEAndroid)权限处理
+### 4.SELinux(SEAndroid)权限处理
 
-谷歌官网地址：`https://source.android.google.cn/security/selinux`
+谷歌官网地址：[https://source.android.google.cn/security/selinux](https://source.android.google.cn/security/selinux)
 
 我这里主要涉及的`*.te` 如下：
 
@@ -166,7 +165,37 @@ service hwstbcmdservice-1-0 /vendor/bin/hw/vendor.nathan.hwstbcmdservice@1.0-ser
 
 如上这些熟悉HIDL服务创建的童鞋会比较了解
 
+下面说下`hal_hwstbcmdservice.te`这个权限添加过程：
 
+1. 我一般先临时关闭掉selinux，`setenforce 0` 然后调用接口
+2. 抓avc的打印：`dmesg |grep avc` 可以查找与调用命令相关的权限，加入到.te中
+3. 添加.te完毕后，整编Andorid，如果出错，那就说明违反了谷歌政策，需要找找其他解决方案，比如是否是权限过大，例如`ioctl`,此时需要`allowperm`加上具体要添加的权限才行，具体大家可以自行百度
+4. 然后在`out/target/product/XXX/vendor/etc/selinux/vendor_sepolicy.cil`里面找下是否存在，然后烧录img来验证
+5. 谷歌也提倡最小权限原则，也就是只要能实现目的，就别多加额外权限，保障系统安全，人人有责
+
+#### 5.共享文件夹问题
+
+有些时候，执行的shell命令需要输出结果到某个文件中供system app读取，而有些时候，system app需要保存一些网络数据等到某个文件夹中，以便shell命令能读取和执行,不过sdcard等目录可能安全性不高，容易别发现。此时，就需要我们自定义一个目录(详见`file.te`)
+
+以`tcpdump`命令为例：`"/vendor/bin/tcpdump -i any -s 0 -w /data/vendor/nathandata/1.pcap`
+
+命令中-w参数需要指定一个目录，当tcpdump把结果输出到目录后，system app需要读取，或者分析，或者上传。那么由于这个文件是root shell创建的。自然1.pcap的权限是`root:root` 
+
+解决方法：通过jar，调用`chown` 修改文件所有权为`system:system`即可，
+
+反之如果是system app保存的文件，那么想让root shell读取的话，那么就改成`root:root`呗
+
+以上，亲测都是OK的。
+
+
+
+#### 总结
+
+	- 没有万能的接口，都是遇到具体需求，具体分析的
+	- 本文的例子是本人`智慧`的结晶，如果满意，还请三连
+	- 源码传送门：[https://github.com/Nathan-Feng/shell-hidl](https://github.com/Nathan-Feng/shell-hidl)
+
+下一篇介绍下相关编译的配置部分，欢迎大家点击阅读
 
 
 
