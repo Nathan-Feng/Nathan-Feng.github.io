@@ -11,8 +11,6 @@ tags:
 
 ---
 
-> 步伐不必太大，只要方向正确就好
->
 > 既然想把世间精彩尽收眼底，就必须踏出舒适圈
 >
 > Life's so short and such glorious images in the world, and such horror as whell, but I want to see it all. So I've moved out of my confort zone.
