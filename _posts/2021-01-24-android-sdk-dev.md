@@ -128,7 +128,7 @@ PRODUCT_PACKAGES += Test //查询所有Android.mk或者.bp中LOCAL_MODULE(LOCAL_
 `BOARD_SEPOLICY_DIRS` 用于声明.te需要包含的目录
 
 ```
-`BOARD_SEPOLICY_DIRS += vendor/mm/nn/sepolicy   ///包含另一个有.te策略的目录
+BOARD_SEPOLICY_DIRS += vendor/mm/nn/sepolicy   ///包含另一个有.te策略的目录
 ```
 
 `DEVICE_MANIFEST_FILE`,`DEVICE_MATRIX_FILE`,`DEVICE_FRAMEWORK_COMPATIBILITY_MATRIX_FILE`这些主要是声明HIDL注册xml的

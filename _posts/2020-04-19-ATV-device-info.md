@@ -47,6 +47,10 @@ tags:
   (**注意**：调用此接口返回的数据总数，会比签名后调用的数据少一些，因为有些属性在普通权限下无法获取)
 
   ![cpuinfo](/img/device-info/shell-getprop.jpg)
+  
+* 增加新接口`String[] getSystemLogcatPids()` 通过执行shell 命令拿到目前`logcat`进程的所有pid信息
+
+* 
 
 ### 系统级权限接口(`SystemDeviceInfoApi`)
 
@@ -71,6 +75,51 @@ tags:
 * `getGpuFreqRange()` //获取GPU的频率范围(根据平台不同，会有差异，目前以RTK1319平台为测试)
 
 * `String[][] getAllNetData()` // 获取有线网卡和Wifi的各自流量，可以计算实时网速(通过`cat /proc/self/net/dev`命令获取相关参数)
+
+* 增加获取cpu使用率的接口`getCurCpuRate`
+
+* 增加系统唤醒接口`forceSystemWakeUp`
+
+* 增加系统待机接口`forceSystemStandby`
+
+* 增加系统重启接口`forceSystemReboot`
+
+* 增加判断当前是否待机接口`isSystemStandby`
+
+* 增加恢复出厂接口`factoryReset`
+
+* 增加获取system进程pid的接口`getSystemProcessPid`
+
+* 增加kill system进程pid的接口`killSystemProcessPid`
+
+* 增加获取root进程pid的接口`getRootProcessPid`
+
+* 增加kill root进程pid的接口`killRootProcessPid`
+
+* 增加静默卸载app接口`uninstallPkg`
+
+### 新增蓝牙接口
+
+`BluetoothDeviceInfoApi.java`
+
+	- 获取绑定列表
+	- 获取设备蓝牙名字
+	- 获取设备蓝牙MAC
+	- 使能蓝牙
+	- 重置蓝牙
+
+### 新增网络相关接口
+
+`NetworkDeviceInfoApi.java`
+
+	- 获取有线相关信息`getEthernetInfo`
+	- 获取wifi相关信息 `getWifiItemInfo`
+	- 设置有线或者wifi相关信息`setNetworkStaticIpInfo`
+	- 打开wifi，关闭wifi，重置wifi等
+
+新增存储接口
+
+`StorageDeviceInfoApi.java`
 
 ### 通用BuildInfo接口
 
