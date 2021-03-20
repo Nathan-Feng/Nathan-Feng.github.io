@@ -119,7 +119,7 @@ tags:
 
   ```
   #拷贝完成后，war会被自动解压
-  sudo cp ~/soft/OpenGrok/opengrok/lib/source.war /var/lib/tomcat8/webapps/
+  sudo cp ~/opengrok/opengrok/lib/source.war /var/lib/tomcat8/webapps/
   ```
 
   ![webapp-aosp](/img/opengrok-android/webapp-aosp.png)
