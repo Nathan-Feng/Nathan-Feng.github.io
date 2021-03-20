@@ -21,11 +21,11 @@ tags:
 
 上篇利用Opengrok进行安卓源码的检索，在自己电脑浏览倒是没有问题，但是我想共享给其他同事，或者放在网上给网友使用呢，那就需要今天的主角nps上场了。引用官网原话：一款轻量级、高性能、功能强大的内网穿透代理服务器。支持tcp、udp、socks5、http等几乎所有流量转发，可用来访问内网网站、本地支付接口调试、ssh访问、远程桌面，内网dns解析、内网socks5代理等等……，并带有功能强大的web管理端。话不多说，开始教程吧。
 
-官网：https://github.com/ehang-io/nps
+官网：[https://github.com/ehang-io/nps](https://github.com/ehang-io/nps)
 
 ### 内网穿透介绍
 
-什么是内网穿透？引用https://blog.csdn.net/hteacher001/article/details/105858724 说的很好,我直接引用过来
+什么是内网穿透？引用[https://blog.csdn.net/hteacher001/article/details/105858724](https://blog.csdn.net/hteacher001/article/details/105858724) 说的很好,我直接引用过来
 内网穿透，实际上是三台电脑之间的故事，分别是客户端（用户访问的服务器），中转服务器（云服务器，可被外界访问的服务器）和内网服务器；
 总之一句话，内网穿透就是客户端通过访问中转服务器间接性的去访问内网服务器中的东西。
 
@@ -35,7 +35,7 @@ tags:
 
 ### 步骤1：nps工具下载和安装
 
-根据上图中说明，我下载了win10的服务端和linux的客户端工具，下载地址：https://github.com/ehang-io/nps/releases
+根据上图中说明，我下载了win10的服务端和linux的客户端工具，下载地址：[https://github.com/ehang-io/nps/releases](https://github.com/ehang-io/nps/releases)
 
 全家福如下图[v0.26.9](https://github.com/ehang-io/nps/releases/tag/v0.26.9)（请忽略android_client.apk）
 
@@ -117,7 +117,7 @@ tags:
 
 感谢如下网址：
 
-https://blog.csdn.net/hteacher001/article/details/105858724 
+[https://blog.csdn.net/hteacher001/article/details/105858724](https://blog.csdn.net/hteacher001/article/details/105858724)
 
 全文 完！
 
