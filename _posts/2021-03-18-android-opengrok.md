@@ -7,7 +7,6 @@ author:     "Nathan"
 tags:
 
     - OpenGrok
-    - Android
     - Tool
 
 ---
