@@ -143,6 +143,8 @@ java \
     -m 1024
 ```
 
+![opengrok-start](/img/opengrok-android/opengrok-start.png)
+
 修改脚本的权限 `sudo chmod a+x openGrok.sh`
 执行脚本`./openGrok.sh` ,执行过程后会有WARNING和ERROR的打印，直接忽略就好，看内容是由于有些代码是软链接，或者打不开，或者格式不支持引起的，不影响结果。
 
