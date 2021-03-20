@@ -31,11 +31,11 @@ tags:
 
 ### 步骤1：下载Android 11.0源码
 
-根据官网的步骤：https://source.android.google.cn/setup/develop#installing-repo 先安装`repo`
+根据官网的步骤：[https://source.android.google.cn/setup/develop#installing-repo](https://source.android.google.cn/setup/develop#installing-repo) 先安装`repo`
 
 ![repo](/img/opengrok-android/repo.png)
 
-然后进行源码下载：https://source.android.google.cn/setup/build/downloading#initializing-a-repo-client
+然后进行源码下载：[https://source.android.google.cn/setup/build/downloading#initializing-a-repo-client](https://source.android.google.cn/setup/build/downloading#initializing-a-repo-client)
 
 我这里下载的是`repo init -u https://android.googlesource.com/platform/manifest -b android-11.0.0_r3`
 
@@ -60,7 +60,7 @@ tags:
    ```
 
    测试是否安装成功
-   在浏览器输入http://localhost:8080/看到:**It works** 就表示成功了
+   在浏览器输入[http://localhost:8080/](http://localhost:8080/)看到:**It works** 就表示成功了
 
  * 安装`universal-ctags`
 
@@ -87,7 +87,7 @@ tags:
 
  * 安装`OpenGrok`
 
-   官网主页地址https://github.com/oracle/opengrok/releases/
+   官网主页地址[https://github.com/oracle/opengrok/releases/](https://github.com/oracle/opengrok/releases/)
 
    下载后缀为.tar.gz的文件，不要下载源码，我这里下载的是1.3.11版本(https://github.com/oracle/opengrok/releases/tag/1.3.11)。
 
@@ -150,15 +150,15 @@ java \
 
 ### 步骤5：验证
 
-构建完成后，直接在浏览器中 **http://localhost:8080/aosp11/**，可以看到如下的效果那表示你就成功了（如果不成功就重启下tomcat8再试一次）
+构建完成后，直接在浏览器中 [**http://localhost:8080/aosp11/**](https://source.android.google.cn/setup/develop#installing-repo)，可以看到如下的效果那表示你就成功了（如果不成功就重启下tomcat8再试一次）
 
 ![source-main](/img/opengrok-android/source-main.png)
 
 感谢如下网址：
 
-https://www.xiezeyang.com
+[https://www.xiezeyang.com](https://www.xiezeyang.com)
 
-https://blog.csdn.net/u010041075/article/details/100097890
+[https://blog.csdn.net/u010041075/article/details/100097890](https://blog.csdn.net/u010041075/article/details/100097890)
 
 全文 完！
 
