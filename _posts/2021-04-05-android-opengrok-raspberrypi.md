@@ -88,7 +88,7 @@ $ rm -rf prebuilts
 
  * 安装Tomcat10  [https://tomcat.apache.org/download-10.cgi](https://tomcat.apache.org/download-10.cgi)
 
-   ![tomcat10](/img/raspberry-android/tomcat10.png)
+   ![tomcat10](/img/raspberrypi-android/tomcat10.png)
 
    下载好Tomcat 使用下面解压命令进行解压,我把压缩文件放在/home/pi目录下
 
@@ -107,7 +107,7 @@ $ rm -rf prebuilts
 
    测试是否安装成功,在浏览器输入[http://localhost:8080/](http://localhost:8080/)看到如下就表示成功了
 
-   ![tomcat10-start](/img/raspberry-android/tomcat10-start.png)
+   ![tomcat10-start](/img/raspberrypi-android/tomcat10-start.png)
 
  * 安装`universal-ctags`
 
@@ -130,7 +130,7 @@ $ rm -rf prebuilts
    ```
    
 
-![ctags-install](/img/raspberry-android/ctags-install.png)
+![ctags-install](/img/raspberrypi-android/ctags-install.png)
 
  * 安装`OpenGrok`
 
@@ -151,7 +151,7 @@ $ rm -rf prebuilts
 
   比如database/project1 或者database/project2,这里我先建立一个project1:Android_11.0.0_r3,并建立三个子文件夹`src data etc`,其中`src`里面存放的就是真正的源码，或者是源码的软连接，`data`里面存放的是opengrok执行索引后自动保存的数据，`etc`里面保存了一个配置文件，是用于给tomcat10配置的。
 
-  ![database](/img/raspberry-android/android-database.png)
+  ![database](/img/raspberrypi-android/android-database.png)
 
   由于树莓派sdcard空间很小，所以我src和data下面的数据都是通过软连接到移动硬盘中的，如上图
 
@@ -168,7 +168,7 @@ $ rm -rf prebuilts
 
   然后修改 `/home/pi/tomcat/apache-tomcat-10.0.4/webapps/aosp11/WEB-INF/web.xml` 中 configuration.xml 文件中的`<param-value>`
 
-  ![web-config](/img/raspberry-android/web-config.png)
+  ![web-config](/img/raspberrypi-android/web-config.png)
 
   最后需要配置开机自启动，否则就需要手动执行脚本才行
   
@@ -198,7 +198,7 @@ java \
 修改脚本的权限 `sudo chmod a+x build.sh`
 执行脚本`./build.sh` ,执行过程后会有WARNING和ERROR的打印，直接忽略就好，看内容是由于有些代码是软链接，或者打不开，或者格式不支持引起的，不影响结果。
 
-![opengrok-warning](/img/raspberry-android/opengrok-warning.png)
+![opengrok-warning](/img/raspberrypi-android/opengrok-warning.png)
 
 ### 步骤5：验证
 
