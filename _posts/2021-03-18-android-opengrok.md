@@ -138,7 +138,7 @@ java \
     -Xmx4g -jar /home/xxx/opengrok/opengrok/lib/opengrok.jar \
     -c /home/xxx/ctags/bin/ctags \
     -s /home/xxx/opengrok/database/Android_11.0.0_r3/src/android -d /home/xxx/opengrok/database/Android_11.0.0_r3/data -H -P -S -G \
-    -W /home/xxx/opengrok/database/Android_11.0.0_r3/etc/configuration.xml -U http://localhost:8080/source \
+    -W /home/xxx/opengrok/database/Android_11.0.0_r3/etc/configuration.xml -U http://localhost:8080/aosp11 \
     -T 2 \
     -m 1024
 ```
