@@ -193,7 +193,7 @@ java \
     -m 1024
 ```
 
-![opengrok-start](/img/raspberry-android/opengrok-start.png)
+![opengrok-start](/img/raspberrypi-android/opengrok-start.png)
 
 修改脚本的权限 `sudo chmod a+x build.sh`
 执行脚本`./build.sh` ,执行过程后会有WARNING和ERROR的打印，直接忽略就好，看内容是由于有些代码是软链接，或者打不开，或者格式不支持引起的，不影响结果。
