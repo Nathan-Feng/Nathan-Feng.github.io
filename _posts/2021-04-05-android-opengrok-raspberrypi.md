@@ -65,6 +65,8 @@ $ find . -name "*.zip" | xargs  rm -rf
 $ find . -name "*.jar" | xargs  rm -rf
 # 编译工具是没有必要的目录
 $ rm -rf prebuilts
+# 删掉大于10M的文件，否则会引起索引异常
+$ find . -type f -size +10M | xargs rm
 ```
 
 
@@ -197,6 +199,8 @@ java \
 
 修改脚本的权限 `sudo chmod a+x build.sh`
 执行脚本`./build.sh` ,执行过程后会有WARNING和ERROR的打印，直接忽略就好，看内容是由于有些代码是软链接，或者打不开，或者格式不支持引起的，不影响结果。
+
+我这边在构建过程中，发现会有内存溢出等错误，所以去掉了 `-U http://localhost:8080/aosp11`
 
 ![opengrok-warning](/img/raspberrypi-android/opengrok-warning.png)
 
