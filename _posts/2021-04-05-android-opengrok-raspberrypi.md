@@ -130,7 +130,6 @@ $ find . -type f -size +10M | xargs rm
    # 安装（这里会将软件安装到/home/pi/opengrok/ctags/ctags/bin目录下，这个路径需要在后面写入配置文件中）
    sudo make install
    ```
-   
 
 ![ctags-install](/img/raspberrypi-android/ctags-install.png)
 
@@ -236,6 +235,10 @@ java \
 树莓派4B买了差不多两年了，本来想好好玩玩的，无奈真是像网友说的，变成吃灰神器，经过本文调教，也算是没白花冤枉钱，
 
 以后有其他好玩的项目，也会再多玩玩
+
+全家福如下
+
+![family](/img/opengrok-android/family.png)
 
 全文 完！
 
