@@ -238,7 +238,7 @@ java \
 
 全家福如下
 
-![family](/img/opengrok-android/family.png)
+![family](/img/raspberrypi-android/family.png)
 
 全文 完！
 
