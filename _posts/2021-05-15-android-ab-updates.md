@@ -218,18 +218,85 @@ PAUSE -->suspend()
 RESUME-->resume()
 ```
 
-
-
 ### API封装
 
 我这边根据sample的代码，直接进行了简单封装，后续如果谷歌同步更新代码，我这边只需要同步更新源码即可，
 
+代码路径[https://github.com/Nathan-Feng/ABUpdateSample](https://github.com/Nathan-Feng/ABUpdateSample)
+
 下面说下API具体内容
 
 ```
+//.api.HiABUpdate.java
+public interface HiABUpdate {
+
+	//进行初始化UpdateManager，并进行与UpdateEngine进行bind和监听回调
+    void init();
+
+	//给调用者进行监听回调状态的接口，把UI的状态机，以及UpdateEngine的状态，进度，错误都进行回调
+    void setUpdateCallbackListener(HiABUpdateImpl.UpdateCallback callback);
+
+	//执行升级的主方法，主要是执行json的地址，支持http://xxx.json ,https,file://,以及string构造的json字符串
+    void applyUpdateConfig(String jsonUrl, Context context);
+
+	//主要是升级过程中传入不同的动作action，包括pause，resume，reset，stop等动作，这里增加了注解，强制调用者选择
+    void sendUpdateAction(@HiABUpdateImpl.UpdateAction int action);
+
+	//主要是升级结束后，收到UPDATED_BUT_NOT_ACTIVE这个错误码后进行的动作
+    void switchSlot();
+
+	//去初始化， 移除监听等动作
+    void destroy();
+
+}
+
+//接口的实现，具体不做介绍了
+.api.HiABUpdateImpl.java
 ```
 
+### sample.json介绍
 
+上面说了，谷歌sample中主要是解析sample.json并把相关参数送给`UpdateEngine.java`
+
+所以这里再介绍下这个json,如下图
+
+![json](/img/ab-update/json.png)
+
+我这里把流式和非流式进行了一下对比，部分说明如下
+
+```
+{
+    "name": "nathan test ota",//就是一个名字，不重要
+    "url": "http://10.18.212.21:9012/xxx.zip", //配置升级包的地址，http表明是流式升级
+    "ab_install_type": "STREAMING",  //流式升级要配置成STREAMING,非流式是NON_STREAMING
+    "ab_config": {
+        "force_switch_slot": false,//如果是false，那么就需要升级后收到UPDATED_BUT_NOT_ACTIVE，然后需要再switchSlot()
+		"verify_payload_metadata": false,//是否校验payload中的metadata
+		"property_files": [    //非常重要
+            {
+                "filename": "payload.bin",   //升级包中具体升级内容的名字
+                "offset": 1264,    //payload.bin在升级包中的偏移
+                "size": 643533225   //payload.bin的文件大小，可以在payload_properties.txt中查看FILE_SIZE
+            },
+	    {
+                "filename": "payload_properties.txt",   //升级包中的文件名字
+                "offset": 643534683,    //升级包中payload_properties.txt在升级包中的偏移地址
+                "size": 154   //payload_properties.txt的文件大小
+            }
+        ]
+    }
+}
+```
+
+### hszip.jar说明
+
+上一节中配置sample.json时，需要填写offset，size等参数，那么我们如何才能得到升级包中文件的这两个参数值呢
+
+这里我参考sample中的`PayloadSpecs.java中的方法forNonStreaming() 封装了一个jar包，便于大家进行解析zip包，并拿到那两个参数
+
+具体用法如下：`java -jar hszip.jar  xxx.zip`
+
+![hszip](/img/ab-update/hszip.png)
 
 
 
