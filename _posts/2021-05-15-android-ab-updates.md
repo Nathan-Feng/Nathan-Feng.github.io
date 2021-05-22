@@ -93,7 +93,7 @@ vendor_a, vendor_b
 
 谷歌对于配置有基本要求：详见文档[https://source.android.google.cn/devices/tech/ota/ab/ab_implement](https://source.android.google.cn/devices/tech/ota/ab/ab_implement)
 
-以RTK平台为例`device/realtek/hank/device.mk`
+以RTK平台为例`device/realtek/xxx/device.mk`
 
 ![device.mk](/img/ab-update/device.mk.png)
 
@@ -150,11 +150,86 @@ vendor_a, vendor_b
 2. 绑定监听回调
 3. 执行applyPayload方法
 
+下面说下源码中重要代码的具体功能：
+
+```
+//UI主入口，主要是初始化
+.ui.MainActivity.java
+
+//主要是管理升级流程，把升级状态等返回给MainActivity,并且与UpdateEngine.java异步交互
+//UI中的？？？？？？
+UpdateManager.java
+
+//UI自己维护的一个状态机，详见下面的流程图
+UpdaterState.java
+
+//对于升级的一个完整描述，包括升级类型，升级包地址，payload.bin的大小和偏移，以及它的描述信息，
+//就是通过解析sample.json得到的
+UpdateConfig.java
+
+//从sample.json中解析出各种参数后，最终会解析出来所有内容并发送给UpdateEngine.java
+PayloadSpec.java
+
+//主要功能是从升级包中解析出payload_properties.txt等文件并保存到/data/ota_package下面
+//如果升级包是http/https，那么就下载并保存，
+//如果升级包是放在本地的，那么就直接调用PayloadSpecs中forNonStreaming方法直接解析
+.services.PrepareUpdateService.java
+
+//根据url以及偏移地址等信息，把内容下载到指定位置，我这里模仿写了一个直接下载到执行位置的方法downloadFile()
+.utils.FileDownloader.java
+
+//一些常量定义，我这里增加了payload_properties.txt中的四个属性值，便于后续下载更新用
+.utils.PackageFiles.java
+
+//对于非流式升级，直接解析升级包，拿到payload.bin的offset和size，
+//对于流式升级，那么就是构造PayloadSpec而已
+.utils.PayloadSpecs.java
+
+//主要是读取本地json文件并解析成UpdateConfig对象
+.utils.UpdateConfigs.java
+
+//与system/update_engine/common/error_code.h的错误码值一样的
+.utils.UpdateEngineErrorCodes.java
+
+//额外的一些传递给UpdateEngine.java的属性，
+//SWITCH_SLOT_ON_REBOOT=0 重启后不进入新分区
+//RUN_POST_INSTALL=0 这个看https://source.android.com/devices/tech/ota/ab/#post-installation
+.utils.UpdateEngineProperties.java
+
+// UpdateEngine.UpdateStatusConstants中状态码相同
+.utils.UpdateEngineStatuses.java
+```
+
 状态机流程如下：
 
 ![ui-state-machine](/img/ab-update/ui-state-machine.png)
 
-//TODO 介绍源码
+UI图如下，
+
+![ui](/img/ab-update/ui.png)
+
+上图中各个BUTTON，就对应`frameworks/base/core/java/android/os/UpdateEngine.java`中的各个方法`
+
+```
+APPLY -->applyPayload()
+STOP  -->cancel()
+RESET -->resetStatus()
+PAUSE -->suspend()
+RESUME-->resume()
+```
+
+
+
+### API封装
+
+我这边根据sample的代码，直接进行了简单封装，后续如果谷歌同步更新代码，我这边只需要同步更新源码即可，
+
+下面说下API具体内容
+
+```
+```
+
+
 
 
 
