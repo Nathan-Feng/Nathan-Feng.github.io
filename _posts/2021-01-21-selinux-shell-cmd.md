@@ -8,7 +8,7 @@ tags:
 
     - Tools
     - API
-    - Selinux
+    - SElinux
     - HIDL
 
 ---
@@ -16,7 +16,6 @@ tags:
 > 步伐不必太大，只要方向正确就好
 >
 > The steps you take don't need to be big. They just need to  take you in the right direction.
->
 
 
 
