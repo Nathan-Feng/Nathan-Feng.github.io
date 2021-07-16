@@ -27,8 +27,6 @@ tags:
 
 占楼
 
-这里我就简单说下大致内容
-
 ### DAC介绍
 
 占楼
@@ -52,17 +50,11 @@ tags:
 
 ### SEAndroid实战
 
-源码路径：`bootable/recovery/updater_sample/`
-
-大致流程如下：
-
 占楼
 
 ### MLS介绍
 
 占楼
-
-
 
 ### Code & Doc
 
@@ -78,12 +70,3 @@ tags:
 网友2：[https://blog.csdn.net/luoshengyang/article/details/35392905](https://blog.csdn.net/luoshengyang/article/details/35392905)
 
 全文 完！
-
-
-
-
-
-
-
-
-
