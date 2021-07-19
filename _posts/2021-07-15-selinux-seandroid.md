@@ -115,7 +115,42 @@ pi@raspberrypi:~/Downloads $
 
 ### Android沙箱介绍
 
-占楼
+Application Sandbox，官网地址：[应用沙盒](https://source.android.google.cn/security/app-sandbox)
+
+简单来说主要是
+
+* 基于Linux保护应用资源
+
+* 每个app分配唯一的UID/GID,在各自的的进程中运行
+
+* 互相不能访问(默认)
+
+既然Android是基于Linux的，那么进程和资源也有`uid/gid/gids`,下面就介绍一下
+
+* 每个app安装之后都会被分配一个`uid`叫`aid`，源码路径`/system/core/include/private/android_filesystem_config.h`
+
+* `id`查看uid/gid，命令没变,`cat /proc/xxx/status`查看进程信息，包括uid、gid、gids
+
+* `ps -l`查看进程`uid/gid` 比如 `u0_a36`那么意思就是10000 add 36 为10036, 其中`#define AID_APP          10000  /* first app user */`
+
+* 资源或者说文件的`uid/gid`定义路径:`/system/core/include/private/android_filesystem_config.h`
+
+* 最后说下Android 服务service，其一般会伴随着一个xxx.rc文件,并在其中声明其uid/gid,例如下面中声明user和group，对应的就是uid和gid
+
+  ```
+  service surfaceflinger /system/bin/surfaceflinger
+      class core
+      user system
+      group graphics drmrpc readproc
+      onrestart restart zygote
+      writepid /sys/fs/cgroup/stune/foreground/tasks
+  ```
+
+* 另外设备节点如`/dev/binder `的uid和gid一般定义在各个ueventd.rc文件中 一般放在`/system/etc/ueventd.rc`下
+
+那么Android中的权限Permission除了上面介绍的rwx，对于APK开发，还包括清单文件中需要配置的权限，路径：`/frameworks/base/core/res/AndroidManifest.xml`
+
+无论是通过Android API，Java API，NDK C API，还是执行shell命令，那么要么在api调用过程中，如framework，要么是在底层，通过uid/gid等进行权限管理和控制。道理是相通的。
 
 
 ### SELinux介绍
