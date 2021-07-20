@@ -155,15 +155,83 @@ Application Sandbox，官网地址：[应用沙盒](https://source.android.googl
 
 ### SELinux介绍
 
-占楼
+全称Security-Enhanced Linux (SELinux) ，安全增强型Linux，是增强安全的一个机制，那么就探究下到底相比DAC模式，如何增强的？
+
+首先说下背景知识，简单了解下：
+
+* 是集成在kernel 2.6.x中一个安全架构
+* 是Linux Security Modules (LSM)的一部分
+* 是美国国家安全局和linux社区开发的一个项目
+* 是MAC (Mandatory Access Control)在Linux内核级的一个实现
+
+其实最重要的就是它是MAC的一个linux实现，那么MAC是什么，跟DAC什么关系呢？
 
 ### MAC介绍
 
-占楼
+* MAC被预置到内核级的系统中，对于linux，是预置在kernel里面的
+* MAC限制**主体**(英文叫subject，比如用户或进程)对**客体**(英文名叫object，比如文件等资源)的**访问**和**操作**的能力
+* MAC机制会给**所有**主体和客体分配一个**安全标签**(Security label)，包括用户user，进程process，访问的资源等
+* MAC机制会定义一个清晰明确的的访问**规则**，限制每个用户或者进程只允许访问它**已经定义好**的资源，所以即使是Root权限也能被限制
+* 是非DAC的，不能被资源的所有者修改
+
+如上可以看出，我们想要了解SELinux以及相关的概念，那么会出现很多名词，当然这些名词其实只是在不同场景下的不同叫法而已，大家习惯就好，我也是经常用，所以有时候会说出好几个名词，但是其实都是表达一个意思。
+
+### SELinux架构流程
+
+![selinux-arc](/img/selinux-seandroid/selinux-arc.png)
+
+我这边画了一个图，大致说下流程，首先主体(Subject比如user或Process)想要访问(Access) 一个客体(Object，比如一个文件file吧),那么首先需要经过DAC判断，如果DAC判断失败了(比如rwx权限不足等)，那么直接就会拒绝
+
+如果DAC验证通过，那么就会进入MAC的判断，其中MAC，我又把具体内容扩展了一下，见图中虚线方框内，
+
+进入MAC时，首先会通过AVC(访问向量缓存)，看名字cache缓存，那么缓存什么呢？缓存的是Security Server(相当于数据库) 对于主体访问客体的策略是否命中，如果命中了，那么为了提高判断效率，直接会把这个策略放到AVC里缓存，下次判断时，直接缓存里查找，速度更快。
+
+最后通过AVC检查后，才能得到访问客体的权限，拿到相应的资源。我这里省略了图中的MLS，这个在后续会单独介绍。
+
+如上可以知道，DAC和MAC是互为补充的，先要经过DAC后才能进行MAC，所以SELinux也叫增强安全型
 
 ### SEAndroid介绍
 
-占楼
+了解过SELinux之后，那么SEAndroid就比较好理解了，其实：
+
+SELinux    +   Android    =    SEAndroid
+
+也就是说安卓平台对于SELinux的一个实现，或者应用于安卓上，就叫SEAndroid
+
+官网地址：[https://source.android.google.cn/security/selinux](https://source.android.google.cn/security/selinux)
+
+简单说下历史演变过程：
+
+* Android 4.3（宽容模式）
+* Android 4.4（部分强制模式）
+* Android 5.0 及更高版本中，已全面强制执行 SELinux
+* Android 6.0 高度限制对 /proc 的访问
+* Android 8.0 更新了 SELinux 以便与 Treble 配合使用
+
+这里解释下宽容模式（Permissive）和强制模式（Enforcing），SELinux 按照默认**拒绝**的原则运行：任何未经明确允许的行为都会被拒绝。SELinux 可按**两种**全局模式运行：
+
+* 宽容模式：权限拒绝事件会被记录下来，但不会被强制执行。
+* 强制模式：权限拒绝事件会被记录下来**并**强制执行。
+
+### Android CDD
+
+提到安卓，不得不提CDD兼容性文档，谷歌认证必备的，
+
+CDD中对于SELinux部分也是有强制要求的，具体链接如下：[https://source.android.google.cn/compatibility/11/android-11-cdd#9_7_security_features](https://source.android.google.cn/compatibility/11/android-11-cdd#9_7_security_features)
+
+这里我直接粘贴过来翻译过的内容
+
+```
+如果设备要使用 Linux 内核，则：
+•[C-1-1] 必须实现 SELinux。
+•[C-1-2] 必须将 SELinux 设置为全局强制模式。
+•[C-1-3] 必须将所有域配置为强制模式。不允许使用宽容模式域，包括特定于设备/供应商的域。
+•[C-1-4] 对于 AOSP SELinux 域以及特定于设备/供应商的域，不得修改、省略或替换上游 Android 开源项目 (AOSP) 中提供的 system/sepolicy 文件夹中存在的 neverallow 规则，并且政策必须在所有 neverallow 规则都存在的情况下编译。
+•[C-1-5] 必须在每个应用的 SELinux 沙盒中运行面向 API 28 级或更高级别的第三方应用，并对每个应用的私有数据目录设定应用级 SELinux 限制。
+•应保留上游 Android 开源项目的 system/sepolicy 文件夹中提供的默认 SELinux 政策，并且应仅针对自己的设备特定配置向该政策进一步添加内容。
+```
+
+可以看出，谷歌对于安卓系统的要求还是挺严格的，当然国内厂家如果不需要满足CDD的话， 很多都是为了拿到更多权限而直接宽容模式运行的，但是这样的话，系统安全就得不到保证，所以说安全和权限总是鱼和熊掌不可兼得
 
 ### SEAndroid实战
 
