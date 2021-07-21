@@ -176,6 +176,8 @@ Application Sandbox，官网地址：[应用沙盒](https://source.android.googl
 
 如上可以看出，我们想要了解SELinux以及相关的概念，那么会出现很多名词，当然这些名词其实只是在不同场景下的不同叫法而已，大家习惯就好，我也是经常用，所以有时候会说出好几个名词，但是其实都是表达一个意思。
 
+SELinux 引入**标签(label)**这个东西来进行权限的操作和规则的制定，在SELinux世界里，任何一个对象都有标签，比如进程，文件，目录等等，全都有标签，就像每个人身份证上的名字一样，与生俱来，而且每个对象的标签都是唯一的。SELinux 在做决定时，就会根据这些标签以及系统根据标签来制定的规则进行权检查。
+
 ### SELinux架构流程
 
 ![selinux-arc](/img/selinux-seandroid/selinux-arc.png)
@@ -213,7 +215,7 @@ SELinux    +   Android    =    SEAndroid
 * 宽容模式：权限拒绝事件会被记录下来，但不会被强制执行。
 * 强制模式：权限拒绝事件会被记录下来**并**强制执行。
 
-### Android CDD
+### Android  CDD
 
 提到安卓，不得不提CDD兼容性文档，谷歌认证必备的，
 
@@ -233,7 +235,165 @@ CDD中对于SELinux部分也是有强制要求的，具体链接如下：[https:
 
 可以看出，谷歌对于安卓系统的要求还是挺严格的，当然国内厂家如果不需要满足CDD的话， 很多都是为了拿到更多权限而直接宽容模式运行的，但是这样的话，系统安全就得不到保证，所以说安全和权限总是鱼和熊掌不可兼得
 
-### SEAndroid实战
+### SEAndroid 标签Label
+
+![selinux-label](/img/selinux-seandroid/selinux-label.png)
+
+下面介绍重要概念**标签label**，我这里又画了一个图，便于理解这个概念，首先label是给所有对象贴的，包括进程和资源
+
+首先标签label又叫`Security Context`安全上下文，然后进程的标签，我们也叫`scontext(source context)源上下文`，而资源的标签也叫`tontext(target context)目标上下文`名字如意思，比较好理解。
+
+然后它长什么样子呢，就是`user:role:domain或者type:mls_level` 也就是三个**冒号**分隔成四个部分
+
+其中`user`叫用户，在SEAndroid中只定义了一个用户叫`u`,
+
+然后`role`角色，在SEAndroid中也定义了两个角色叫`r和object_r`
+
+什么区别的，`r`是给进程用的，而`object_r`是给访问的对象或者叫资源用的，因为object就是对象的意思
+
+然后`domain或者type`什么区别呢？如果进程的标签，那么就是`domain域`,如果是资源，那就是`type`
+
+最后是`mls_level`在SEAndroid里面只定义了一个级别`s0`
+
+其实从标签的样子,大家可以知道，四部分中主要变化的是第三部分(domain/type)，所以安卓中主要以这个部分定义相关规则
+
+SEAndroid 的标签大致分为五类：
+
+* 首先是Service服务相关的标签。
+* 其次，对于基于 Binder 的服务，允许向 Service Manager 注册的标签。
+* 第三，系统属性Property的标签。
+* 第四，设备节点相关的标签。
+* 第五，文件相关的标签
+* 最后，app应用相关的标签。
+
+这里先说下SEAndroid中文件相关的标签
+
+* file_contexts  为文件分配标签，为/system /sys /dev /data 等文件分配标签
+* genfs_contexts  用于为不支持扩展属性的文件系统（例如，proc 或 vfat）分配标签
+* property_contexts 用于为 Android 系统属性分配标签。在启动期间，init 进程会读取此配置。
+* service_contexts 用于为 Android Binder 服务分配标签，以便控制哪些进程可以为相应服务添加（注册）和查找（查询）Binder 引用。在启动期间，servicemanager 进程会读取此配置。
+* seapp_contexts 用于为应用进程和 /data/data 目录分配标签。在每次应用启动时，zygote 进程都会读取此配置；在启动期间，installd 会读取此配置。
+* mac_permissions.xml 用于根据应用签名和应用软件包名称（后者可选）为应用分配 seinfo 标记。随后，分配的 seinfo 标记可在 seapp_contexts 文件中用作密钥，以便为带有该 seinfo 标记的所有应用分配特定标签。在启动期间，system_server 会读取此配置。
+
+最后说下如下的信息含义
+
+```
+W com.aa.bb: type=1400 audit(0.0:199): avc: denied { call } for  scontext=u:r:system_app:s0 tcontext=u:object_r:update_engine:s0 tclass=binder permissive=0 app=com.aa.bb
+```
+
+我们平时一般会通过logcat查看相关打印信息，这里介绍两个命令来抓取selinux的拒绝事件打印：`logcat |grep avc 或者dmess |grep avc` 就会过滤出一大堆类似如上的信息，我们要从这些信息中提取出有用的关键信息，并修改系统的规则来满足我们产品的要求。
+
+下面我会介绍SELinux的规则，并解释如上的信息含义
+
+### SEAndroid  规则Rule/Policy
+
+每个对象都有标签了，那么如何利用这些标签来干事情呢，重要的**规则或者叫策略**登场了
+
+基于安卓源码，介绍下SDK中源码相关的内容：
+
+`system/sepolicy` 是android 关于selinux核心策略配置的所有内容，我们不应该去修改这个路径下任何文件
+
+`/device/manufacturer/device-name/sepolicy` 这个路径会包含芯片厂家所有平台相关的配置，我们主要修改这里
+ `BOARD_VENDOR_SEPOLICY_DIRS += vendor/oem/sepolicy` 我一般会把自定义的规则放在自定义的目录里面，便于跟芯片厂家的分区开
+
+`*.te`策略配置文件的后缀，其中的语言从`global_macros, te_macros attributes` 这些配置文件中读取和使用
+
+### SEAndroid 命令
+
+平时开发中，我这里总结了常用的命令来查看或者设置SELinux相关的内容
+
+| **Command**                            | **Action**                                                   |
+| -------------------------------------- | ------------------------------------------------------------ |
+| setenforce 0/1 或 getenforce           | 临时关闭或打开安全策略 ，或者获取当前策略 Permissive/Enforcing |
+| Ls -Z                                  | 显示文件的Security  Context                                  |
+| ps -Z                                  | 显示进程的Security  Context                                  |
+| id (user)                              | 显示进程/用户的Security Context                              |
+| chcon                                  | 修改文件的Security  Context                                  |
+| restorecon                             | 恢复文件的默认Security  Context                              |
+| dmesg \|grep avc 或  logcat \|grep avc | 查看所有denied的信息                                         |
+
+如下是一些实际操作的效果
+
+```
+console:/sdcard # ps -AZ
+LABEL                          USER            PID   PPID     VSZ    RSS WCHAN            ADDR S NAME                       
+u:r:init:s0                    root              1      0   46160   6772 SyS_epoll_wait      0 S init
+u:r:kernel:s0                  root              2      0       0      0 kthreadd            0 S [kthreadd]
+u:r:netd:s0                    root            306    281   17776   2632 pipe_wait           0 S iptables-restore
+u:r:audioserver:s0             audioserver     332      1   58772  17608 binder_ioctl_write_read 0 S audioserver
+u:r:su:s0                      root           5414   5149   10864   2932 0                   0 R ps
+```
+
+```
+console:/sdcard # id system
+uid=1000(system) gid=1000(system) groups=1000(system) context=u:r:su:s0
+console:/ $ id 
+uid=2000(shell) gid=2000(shell) groups=2000(shell),1007(log),3009(readproc) context=u:r:shell:s0
+console:/ $ id log 
+uid=1007(log) gid=1007(log) groups=1007(log) context=u:r:shell:s0
+```
+
+```
+console:/sys/fs # ls -Zl                                                       
+total 0
+drwxrwxrwt  2 root   root u:object_r:fs_bpf:s0         0 2021-07-20 23:28 bpf
+dr-xr-xr-x  2 root   root u:object_r:sysfs:s0          0 2021-07-20 23:51 cgroup
+drwxr-xr-x 10 root   root u:object_r:sysfs:s0          0 2021-07-20 23:51 ext4
+drwxr-xr-x  3 root   root u:object_r:sysfs_fs_f2fs:s0  0 2021-07-20 23:28 f2fs
+drwxr-xr-x  3 root   root u:object_r:sysfs:s0          0 2021-07-20 23:28 fuse
+drwxr-xr-x  3 root   root u:object_r:sysfs:s0          0 2021-07-20 23:51 incremental-fs
+dr-xr-x---  2 system log  u:object_r:pstorefs:s0       0 2021-07-20 23:28 pstore
+drwxr-xr-x  8 root   root u:object_r:selinuxfs:s0      0 1970-01-01 08:00 selinux
+```
+
+这里说一下，系统开机后，selinux会把文件系统挂在到/sys/fs/selinux这个节点下面，里面有所有android所定义的对象以及相应的权限控制,部分列举如下
+
+```
+console:/sys/fs/selinux/class # ls -l
+total 0
+dr-xr-xr-x 3 root root 0 2021-07-20 23:28 binder
+dr-xr-xr-x 3 root root 0 2021-07-20 23:28 blk_file
+dr-xr-xr-x 3 root root 0 2021-07-20 23:28 bluetooth_socket
+dr-xr-xr-x 3 root root 0 2021-07-20 23:28 capability
+dr-xr-xr-x 3 root root 0 2021-07-20 23:28 capability2
+dr-xr-xr-x 3 root root 0 2021-07-20 23:28 chr_file
+dr-xr-xr-x 3 root root 0 2021-07-20 23:28 dir
+dr-xr-xr-x 3 root root 0 2021-07-20 23:28 fd
+dr-xr-xr-x 3 root root 0 2021-07-20 23:28 fifo_file
+dr-xr-xr-x 3 root root 0 2021-07-20 23:28 file
+dr-xr-xr-x 3 root root 0 2021-07-20 23:28 filesystem
+dr-xr-xr-x 3 root root 0 2021-07-20 23:28 hwservice_manage
+dr-xr-xr-x 3 root root 0 2021-07-20 23:28 ipc
+dr-xr-xr-x 3 root root 0 2021-07-20 23:28 keystore_key
+dr-xr-xr-x 3 root root 0 2021-07-20 23:28 lnk_file
+dr-xr-xr-x 3 root root 0 2021-07-20 23:28 packet_socket
+dr-xr-xr-x 3 root root 0 2021-07-20 23:28 process
+dr-xr-xr-x 3 root root 0 2021-07-20 23:28 process2
+dr-xr-xr-x 3 root root 0 2021-07-20 23:28 property_service
+dr-xr-xr-x 3 root root 0 2021-07-20 23:28 service_manager
+dr-xr-xr-x 3 root root 0 2021-07-20 23:28 sock_file
+dr-xr-xr-x 3 root root 0 2021-07-20 23:28 socket
+dr-xr-xr-x 3 root root 0 2021-07-20 23:28 system
+dr-xr-xr-x 3 root root 0 2021-07-20 23:28 tcp_socket
+dr-xr-xr-x 3 root root 0 2021-07-20 23:28 udp_socket
+dr-xr-xr-x 3 root root 0 2021-07-20 23:28 unix_stream_socket
+```
+
+```
+console:/sys/fs/selinux/class/binder/perms # ls -lZ
+total 0
+-r--r--r-- 1 root root u:object_r:selinuxfs:s0  0 2021-07-20 23:28 call
+-r--r--r-- 1 root root u:object_r:selinuxfs:s0  0 2021-07-20 23:28 impersonate
+-r--r--r-- 1 root root u:object_r:selinuxfs:s0  0 2021-07-20 23:28 set_context_mgr
+-r--r--r-- 1 root root u:object_r:selinuxfs:s0  0 2021-07-20 23:28 transfer
+console:/sys/fs/selinux/class/binder/perms # 
+```
+
+如上可以看到binder所有的权限，可以与其它进程进行binder ipc通信（call，能够向这些进程传递Binder对象（transfer），以及将自己设置为Binder上下文管理器（set_context_mgr）
+
+具体可以查看每个class里面 perms文件夹内的内容。
+
+### SEAndroid 实战
 
 占楼
 
