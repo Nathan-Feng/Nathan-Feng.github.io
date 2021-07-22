@@ -285,7 +285,7 @@ W com.aa.bb: type=1400 audit(0.0:199): avc: denied { call } for  scontext=u:r:sy
 
 下面我会介绍SELinux的规则，并解释如上的信息含义
 
-### SEAndroid  规则Rule/Policy
+### SEAndroid  规则1 Rule/Policy
 
 每个对象都有标签了，那么如何利用这些标签来干事情呢，重要的**规则或者叫策略**登场了
 
@@ -297,6 +297,63 @@ W com.aa.bb: type=1400 audit(0.0:199): avc: denied { call } for  scontext=u:r:sy
  `BOARD_VENDOR_SEPOLICY_DIRS += vendor/oem/sepolicy` 我一般会把自定义的规则放在自定义的目录里面，便于跟芯片厂家的分区开
 
 `*.te`策略配置文件的后缀，其中的语言从`global_macros, te_macros attributes` 这些配置文件中读取和使用
+
+Android 8.0 之后
+
+* system/sepolicy/public  平台共有策略的全部定义
+* system/sepolicy/private 平台私有规则，不会向vendor部分暴露。
+* system/sepolicy/vendor 厂商规则，可引用public的规则，不能引用private的规则
+* device/manufacturer/device-name/sepolicy 厂商自定义的规则，包括如上的vendor部分
+
+总之大家没事可以多去上面说的几个目录下点击文件看看内容，其中厂家一般都只修改device里面定义的规则，否则可能会引起谷歌认证失败的情况。大家还是遵守规则比较好
+
+### SEAndroid 规则2
+
+![image-20210722214227470](/img/selinux-seandroid/selinux-rule.png)
+
+下面介绍下`*.te`中常用的语法规则，目的是让大家能看到，会写
+
+上面图中以`adbd.te`为例，介绍具体的内容
+
+首先说下domain域定义的规则，如下面两行
+
+```
+type adbd, domain; //解释下type就是定义的意思，定义adbd 为domain，看到domain，意思就是adbd是给进程或者用户贴的标签类型
+type adbd_exec, exec_type, file_type; //这行意思是定义一个adbd_exec这个类型，然后属于exec_type和file_type,意思就是adbd这个文件的标签为adbd_exec，那么它是可执行文件(exec_type)，也是文件类型(file_type)
+//图中标注为红色的，都可以通过箭头找到原始定义的源码路径，大家可以自己查看
+```
+
+域定义完了之后，紧接着就是定义规则了
+
+```
+allow domains types:classes permissions; //这行是语法规则，意思就是允许(allow) 某个域(domains) 对于某个资源(types)：资源类型(classes) 拥有资源类型相关的权限(permissions)
+```
+
+举个例子
+
+```
+allow bootanim system_file:dir r_dir_perms;
+允许  域类型为bootanim的进程 对于资源为system_file的目录dir 有读r权限
+```
+
+另外介绍下有4种情况：
+
+* allow - 允许主体对客体执行许可的操作。
+* neverallow - 表示不允许主体对客体执行制定的操作。
+* auditallow - 表示允许操作并记录访问决策信息。
+* dontaudit - 表示不记录违反规则的决策信息，切违反规则不影响运行。
+
+### SEAndroid 规格3
+
+说下SDK编译这些规则最终的产出物策略生成位置
+
+* `boot.img`（针对非 A/B 设备）或 `system.img/vendor.img`（针对 A/B 设备）。
+* (/system|/vendor|/product)/etc/selinux  所有分区中的策略配置文件位置,包括如下内容
+* (plat|vendor|product)_sepolicy.cil: 所有策略转成cil (CIL(common Intermediate Language))
+* *_file_contexts: 文件的security contexts  其中`*` 代表`plat|vendor|product`
+* *_property_contexts: 属性的security contexts
+* *_seapp_contexts: App 的security contexts
+* *_mac_permissions.xml 
 
 ### SEAndroid 命令
 
@@ -389,13 +446,46 @@ total 0
 console:/sys/fs/selinux/class/binder/perms # 
 ```
 
-如上可以看到binder所有的权限，可以与其它进程进行binder ipc通信（call，能够向这些进程传递Binder对象（transfer），以及将自己设置为Binder上下文管理器（set_context_mgr）
+如上可以看到binder所有的权限，可以与其它进程进行binder ipc通信（call），能够向这些进程传递Binder对象（transfer），以及将自己设置为Binder上下文管理器（set_context_mgr）
 
 具体可以查看每个class里面 perms文件夹内的内容。
 
-### SEAndroid 实战
+### SEAndroid 实战1 Service
 
-占楼
+![seandroid-service](/img/selinux-seandroid/seandroid-service.png)
+
+对于在 Android 6.x （Marshmallow） 之后添加的 Service，如果缺少相关文件或编写不正确，则 开机时service是无法正常启动和运行的。
+
+图中定义了一个mytest_service的服务，声明了一个mytest.rc文件，这样放入`system/etc/init/mytest.rc`里面，那么开机后是无法启动的，原因就是**缺少安全策略**
+
+那么如何定义安全策略呢？
+
+![seandroid-service-ok](/img/selinux-seandroid/seandroid-service-ok.png)
+
+```
+mytest_service
+mytest.rc
+file_context
+```
+
+想开机运行服务，需要将相关内容添加到与服务相关的安全标签中（图中file_contexts 和mytest.te）即可
+
+但是这种开机起来的服务是不能注册到binder里面的，也就是不能作为binder服务
+
+那么如何作为binder服务并开机注册呢？请看下图
+
+![seandroid-service-binder](/img/selinux-seandroid/seandroid-service-binder.png)
+
+```
+mytest_service
+mytest.rc
+
+file_context
+service_context.te
+service.te
+```
+
+
 
 ### MLS介绍
 
