@@ -23,6 +23,32 @@ tags:
 
 本文基于Android 11.0, 主要介绍下SELinux和SEAndroid，本文在阅读参考了国内外不少大牛的资料基础上，加上平时的实战总结出来的，希望对大家有所帮助。
 
+### 自编故事
+
+很久以前，有个公司成立了，公司里有总经理张总一人，秘书小王一人，还有李赵等小兵若干，有一天总经理写了一封信，信中写了公司员工每个人的薪水等级，写完后，放在一个柜子里，
+
+结果总经理为了方便，设置了柜子权限为老铁666，然后下班回家睡觉了
+
+秘书小王有事进到张工办公司发现没人，本来想离开的，但是看到屋里有个柜子，上面钥匙挂在上面(可读写)，小王就忍不住打开偷看了一下，看完之后，心生一计，偷偷改了自己的薪水等级，然后关上柜子走了
+
+小李小赵有事请教来找张总，结果也发现了柜子，然后也偷偷改了数据(可读写)，
+
+等第二天张总上班后，再拿出来信的时候，倒吸一口凉气，大事不妙。。。。
+
+心想，这种不小心就把文件的权限暴露给其他人的情况，太不安全了，必须要改革！
+
+张总熬了几个通宵，掉了一把头发，终于新的机制2.0诞生了,
+
+2.0模式是这样的，公司里面的每个人都有一个公司派发的身份证，每个文件，也有一个身份证，公司还雇用了一个保安大爷(董事长化身)，实时监控每个人对于每个文件的行为。
+
+首先张总写信的时候，还是保持以前的模式，每次都检查下其他人是否有可读写的权限，
+
+然后小李在打开柜子想要读写信的时候，保安是会立即检查小李的身份证和信的身份证，然后在一台只能读的电脑上，搜索小李的权限，看看人有没有读写信的权限
+
+如果没有的话，那么保安会立即传送到小李身边，揪住小李拖出去，然后利用公司大喇叭广播所有人，小李想读信，被我阻止了，大家下次别干了啊，
+
+张总每天最开心的事，就是听保安喋喋不休的说谁谁谁没干成什么什么事。。。。
+
 ### 安全系统的重要性
 
 对于安卓系统，比如一台手机，如果系统不安全，不稳定，那么很可能就会出现如下问题：
@@ -463,6 +489,7 @@ console:/sys/fs/selinux/class/binder/perms #
 ![seandroid-service-ok](/img/selinux-seandroid/seandroid-service-ok.png)
 
 ```
+//一共需要如下这些文件
 mytest_service
 mytest.rc
 file_context
@@ -477,6 +504,7 @@ file_context
 ![seandroid-service-binder](/img/selinux-seandroid/seandroid-service-binder.png)
 
 ```
+//一共需要如下这些文件
 mytest_service
 mytest.rc
 
@@ -485,11 +513,119 @@ service_context.te
 service.te
 ```
 
+### SEAndroid 实战2 Property
 
+Google在Android O以后,为了降低vendor和system之间的耦合度,对property的作用区域也做了明确的区分,分为vendor的property和system里的property.
+
+一般我们自定义property的时候，OEM厂家都应该以`vendor.`开头，或者persist,ro这种的，而不能是xx.yy.zz，否则谷歌认证会报错
+
+![property](/img/selinux-seandroid/seandroid-property.png)
+
+```
+//一共需要如下这些文件
+mytest.te //主要是声明权限控制的
+property_contexts //主要是定义你的某个prop的完整标签上下文
+property.te //定义一个新标签类型type
+```
+
+这样，你的property，开机后就会能读取或者写入等操作，
+
+也可以使用`getprop -Z `来看你定义的prop的标签内容
+
+### SEAndroid 实战3 Device设备节点
+
+项目中有可能需要自定义了一个设备节点，比如`/dev/test_dev` ，然后要求访问特定设备节点，
+
+那么在SEAndroid中也需要设置相关文件
+
+同时如果你发现系统内某个设备节点无法访问，权限不足，那么你也有能需要重新修改下这个设备节点的SELinux标签，满足权限要求
+
+下面介绍下
+
+![device](/img/selinux-seandroid/seandroid-device.png)
+
+比如一个服务mytest_service想要打开一个设备节点，如上图，那么一般会设计到如下设置
+
+![image-20210724105041390](E:\Git-Study\github\Nathan-Feng.github.io\Nathan-Feng.github.io\img\selinux-seandroid\seandroid-device-context.png)
+
+```
+涉及到设备相关的文件
+device.te //主要是定义一个设备节点的type
+file_contexts //给具体的设备节点路径定义一个完整的标签，标签中加入你新定义的type
+mytest.te //最后在你的服务的域中，定义相关的权限即可
+```
+
+当然，如果系统内已经定义好了相关设备节点的标签，那么你直接修改为你自定义的，然后权限自然就有了哦
+
+查看设备节点的标签命令`ls -Z` 因为设备节点属于资源，不是进程
+
+### SEAndroid 实战4  Binder/HIDL
+
+在Android 8.0以后，system和vendor进行了隔离，那么就引入了HIDL来进行通信，其实也是binder通信，
+
+这里总结下Android中的三种binder，以及涉及到的SELinux文件，大家具体可以查看自己家平台里面相关的内容
+
+```
+//System binder service相关
+file_contexts
+service.te
+service_context
+servicemanager.te 
+
+//HIDL binder service相关
+file_contexts
+hwservice.te
+hwservice_context
+hwservicemanager.te 
+
+//vendor中的binder service相关
+file_contexts
+vndservice
+vndservice_contexts 
+vndservicemanager.te  
+```
 
 ### MLS介绍
 
-占楼
+当大家查看进程标签时`ps -AZ`，一般会发现如下的标签中有个c512,c768,这种的
+
+```
+u:r:platform_app:s0:c512,c768  u0_a58     747    287 1140388 136964 SyS_epoll_wait      0 S com.android.systemui
+```
+
+SEAndroid里，只定义了s0一个敏感度sensitive，但是定义了0~1023个category。在敏感度只有一个值的情况下，其实MLS已经变成了MCS（Multi-category Security），多组安全。MCS用于隔离，阻断不同组之间的信息流动。颗粒度更细
+
+相关源码定义：
+
+`system/sepolicy/private/mls`     主要策略控制位置![mls-level](/img/selinux-seandroid/seandroid-mls-level.png)
+
+如上 小写`l`代表level，小写`t` 代表type，
+
+`l1`表示subject的MLS level，`l2`表示object的MLS level
+
+`t1`表示subject的type，`t2`表示object的type
+
+上图的mlsconstrain规则，定义了只有在满足下面四个条件其中之一的情况下，才能对系统的任何目录和文件拥有写、追加、重命名等权限：
+
+（1）dir/file的类型为app_data_file（t2 == app_data_file，t2表示object的类型）
+
+（2）主体和客体的MLS相等（l1 eq l2，l1表示subject的MLS level，l2表示object的MLS level）
+
+（3）主体拥有mlstrustedsubject属性（t1 == mlstrustedsubject ）
+
+（4）客体拥有mlstrustedobject属性（t2 == mlstrustedsubject ）mlstrustedsubject和mlstrustedobject分别是subject和object的属性，相应的类型关联到这两种属性后，可以绕过MLS的限制。
+
+`system/sepolicy/private/mls_decl` 使用了宏生成sensitive和category
+
+`system/sepolicy/private/mls_macros`
+
+`/system/sepolicy/private/seapp_contexts` 文件中的levelFrom字段决定应用和目录/文件的level
+
+`external/selinux/libselinux/src/android/android_platform.c` 文件中，通过对levelFrom的值的判断，赋予应用、应用的数据对应level。
+
+![mls-levelfrom](/img/selinux-seandroid/seandroid-mls-levelfrom.png)
+
+![levelcode](/img/selinux-seandroid/seandroid-mls-levelcode.png)
 
 ### Code & Doc
 
@@ -498,10 +634,22 @@ service.te
 谷歌在线文档：[https://source.android.google.cn/security/selinux](https://source.android.google.cn/security/selinux)
 
 
-源码路径 ：/system/sepolicy
+源码路径 ：`/system/sepolicy`
 
-网友1：[https://blog.csdn.net/innost/article/details/19299937/](https://blog.csdn.net/innost/article/details/19299937/)
+其他在线文档，排名不分先后
 
-网友2：[https://blog.csdn.net/luoshengyang/article/details/35392905](https://blog.csdn.net/luoshengyang/article/details/35392905)
+[https://jung-max.github.io/2019/09/16/Android-SEAndroid%EC%A0%81%EC%9A%A9/](https://jung-max.github.io/2019/09/16/Android-SEAndroid%EC%A0%81%EC%9A%A9/)
+
+[https://milestone-of-se.nesuke.com/en/sv-advanced/selinux/selinux-summary/](https://milestone-of-se.nesuke.com/en/sv-advanced/selinux/selinux-summary/)
+
+https://blog.csdn.net/innost/article/details/19299937/
+
+[https://blog.csdn.net/luoshengyang/article/details/35392905](https://blog.csdn.net/luoshengyang/article/details/35392905)
+
+http://androidxref.com/
+
+[https://www.jianshu.com/p/3f6006e74821](https://www.jianshu.com/p/3f6006e74821)
+
+感谢!
 
 全文 完！
