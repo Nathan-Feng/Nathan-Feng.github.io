@@ -546,7 +546,7 @@ property.te //定义一个新标签类型type
 
 比如一个服务mytest_service想要打开一个设备节点，如上图，那么一般会设计到如下设置
 
-![image-20210724105041390](E:\Git-Study\github\Nathan-Feng.github.io\Nathan-Feng.github.io\img\selinux-seandroid\seandroid-device-context.png)
+![device-context](/img/selinux-seandroid/seandroid-device-context.png)
 
 ```
 涉及到设备相关的文件
@@ -597,7 +597,9 @@ SEAndroid里，只定义了s0一个敏感度sensitive，但是定义了0~1023个
 
 相关源码定义：
 
-`system/sepolicy/private/mls`     主要策略控制位置![mls-level](/img/selinux-seandroid/seandroid-mls-level.png)
+`system/sepolicy/private/mls`     主要策略控制位置
+
+![mls-level](/img/selinux-seandroid/seandroid-mls-level.png)
 
 如上 小写`l`代表level，小写`t` 代表type，
 
